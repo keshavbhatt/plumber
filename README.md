@@ -5,11 +5,12 @@
 
 ## Main Features of PLumber :
 
-* Plumber can trim and download online video/audio without downloading it completely.
-* Plumber lets you precisely crop media files (both local and remote).
-* Plumber support many websites like Youtube, Facebook, Instagram, Twitter, Reddit, Arte, Vimeo, Vk, Voot, VuClip, DailyMotion, Yandex, RUTV and many more.
-* Plumber can convert video to GIF.
-* Plumber comes with dark theme.
+* Plumber allows you to trim/crop online video/audio files without downloading them completely.
+* Plumber lets you precisely crop media files (both local and remote). Trim media files with precision of 1 second.
+* Saves video with high quality H.246(MPEG4 AVC) video and AAC audio containers. 
+* Plumber support many websites like Youtube, Facebook, Instagram, Twitter, Reddit, Arte, Vimeo, Vk, Voot, VuClip, DailyMotion, Yandex, RUTV and many more out of the box.
+* Plumber allows you to convert specified video portion to GIF providing you ability to choose preferred Frame rate and Resolution.
+* Plumber comes optional dark theme support.
 * Plumber will bring many more exciting features in near future, spread the name and the app with your friends, family and colleagues.
 
 ## Screenshot :
