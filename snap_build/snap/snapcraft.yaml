@@ -1,0 +1,64 @@
+name: plumber
+version: '1' 
+summary: Media trimmer/downloader for Linux Desktop  
+description: |
+  Powerful Media trimmer/downloader, video to GIF creator app for Linux Desktop.
+
+grade: stable  
+confinement: strict
+icon: snap/gui/icon.png
+base: core18
+
+architectures:
+  - build-on: amd64
+    run-on: amd64  
+
+apps:
+  plumber:
+    command: desktop-launch plumber
+    environment:
+       DISABLE_WAYLAND: 1
+       QT_QPA_PLATFORMTHEME: gtk3 
+    desktop: usr/share/applications/plumber.desktop
+    plugs:
+        - desktop
+        - desktop-legacy
+        - gsettings
+        - home
+        - opengl
+        - audio-playback
+        - removable-media
+        - unity7
+        - x11
+        - mount-observe
+        - network
+        - network-control
+        - network-observe
+        - network-bind
+        - wayland
+plugs:
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
+  qt513:
+    interface: content
+    target: $SNAP/qt513
+    default-provider: qt513
+
+parts:
+  snap-launcher:
+     plugin: dump
+     source: snap_launcher/
+     override-build: |
+            snapcraftctl build
+            sed -i 's|Icon=.*|Icon=${SNAP}/meta/gui/icon.png|g' ${SNAPCRAFT_PART_SRC}/plumber.desktop
+            cp -rf ${SNAPCRAFT_PART_SRC}/plumber.desktop ${SNAPCRAFT_PART_INSTALL}/usr/share/applications/plumber.desktop
