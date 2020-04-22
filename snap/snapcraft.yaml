@@ -36,6 +36,7 @@ apps:
         - network-observe
         - network-bind
         - wayland
+        - dbus
 plugs:
   gtk-3-themes:
     interface: content
