@@ -195,13 +195,14 @@ void Engine::compare_versions(QString date,QString n_date){
 
     if(update){
         QMessageBox msgBox;
-          msgBox.setText(""+QApplication::applicationName()+" Engine update (<b>ver: "+n_date+"</b>) available !");
+          msgBox.setText(""+QApplication::applicationName()+" requires an updated version of its video download engine. Would you like to install the updated version now?");
           msgBox.setIconPixmap(QPixmap(":/icons/sidebar/info.png").scaled(42,42,Qt::KeepAspectRatio,Qt::SmoothTransformation));
-          msgBox.setInformativeText("You are having an outdated engine (<b>ver: "+date+"</b>), please update to latest engine for better performance. Update now ?");
+          msgBox.setInformativeText("Choose Install to download and install the modified version of youtube-dl (1.4MB). Cancel will proceed with the existing engine version (" + date + "), which may not work successfully.");
           msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
           msgBox.setDefaultButton(QMessageBox::Ok);
           QPushButton *p = new QPushButton("Quit",nullptr);
           msgBox.addButton(p,QMessageBox::NoRole);
+          msgBox.button(QDialogButtonBox::Ok).setText("Install"); // this might not work
           int ret = msgBox.exec();
           switch (ret) {
             case QMessageBox::Ok:
@@ -220,13 +221,14 @@ void Engine::compare_versions(QString date,QString n_date){
 void Engine::evoke_engine_check(){
     if(checkEngine()==false){
         QMessageBox msgBox;
-          msgBox.setText(""+QApplication::applicationName()+" needs to download it's engine which is responsible for finding media online");
+          msgBox.setText(""+QApplication::applicationName()+" requires an updated version of its video download engine. Would you like to install the updated version now?");
           msgBox.setIconPixmap(QPixmap(":/icons/sidebar/info.png").scaled(42,42,Qt::KeepAspectRatio,Qt::SmoothTransformation));
-          msgBox.setInformativeText("The "+QApplication::applicationName()+" engine (1.4Mb & is based on youtube-dl with some modifications), is missing, do you want to download it now?");
+          msgBox.setInformativeText("Choose Install to download and install the modified version of youtube-dl (1.4MB). Cancel will proceed with the existing engine version, which may not work successfully.");
           msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
           QPushButton *p = new QPushButton("Quit",nullptr);
           msgBox.addButton(p,QMessageBox::NoRole);
           msgBox.setDefaultButton(QMessageBox::Ok);
+          msgBox.button(QDialogButtonBox::Ok).setText("Install"); // this might not work
 
           int ret = msgBox.exec();
           switch (ret) {
