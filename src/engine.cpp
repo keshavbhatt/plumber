@@ -202,7 +202,7 @@ void Engine::compare_versions(QString date,QString n_date){
           msgBox.setDefaultButton(QMessageBox::Ok);
           QPushButton *p = new QPushButton("Quit",nullptr);
           msgBox.addButton(p,QMessageBox::NoRole);
-          msgBox.button(QDialogButtonBox::Ok)->setText("Install"); // this might not work
+          msgBox.button(QMessageBox::Ok)->setText("Install");
           int ret = msgBox.exec();
           switch (ret) {
             case QMessageBox::Ok:
@@ -228,7 +228,7 @@ void Engine::evoke_engine_check(){
           QPushButton *p = new QPushButton("Quit",nullptr);
           msgBox.addButton(p,QMessageBox::NoRole);
           msgBox.setDefaultButton(QMessageBox::Ok);
-          msgBox.button(QDialogButtonBox::Ok)->setText("Install"); // this might not work
+          msgBox.button(QMessageBox::Ok)->setText("Install");
 
           int ret = msgBox.exec();
           switch (ret) {
