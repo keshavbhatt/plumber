@@ -29,6 +29,7 @@ public slots:
 
     void clearEngineCache();
 
+    bool engineReady();
 private slots:
 
     void readSettings();

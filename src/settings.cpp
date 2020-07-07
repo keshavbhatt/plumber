@@ -46,6 +46,14 @@ void Settings::downloadEngine()
     on_download_engine_clicked();
 }
 
+bool Settings::engineReady()
+{
+    if(engine!=nullptr)
+        return engine->engineReady();
+    else
+        return false;
+}
+
 void Settings::init_engine()
 {
     engine = new Engine(this);

@@ -12,6 +12,19 @@ Engine::Engine(QObject *parent) : QObject(parent)
     });
 }
 
+//plublic method to call engine check, at runtime
+bool Engine::engineReady()
+{
+    if(!checkEngine()){
+        evoke_engine_check();
+    }else{
+        check_engine_updates();
+        if(updateAvalable)
+            return false;
+    }
+    return checkEngine();
+}
+
 bool Engine::checkEngine(){
     QString setting_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     QFileInfo checkFile(setting_path+"/core");
@@ -57,6 +70,7 @@ void Engine::slot_netwManagerFinished(QNetworkReply *reply)
         {
             if(reply->error() == QNetworkReply::NoError){
                 core_file->write(reply->readAll());
+                updateAvalable = false;
                 core_file->close();
                 clearEngineCache(); //call clear engine cache after engine update
                 get_engine_version_info();
@@ -191,6 +205,7 @@ void Engine::compare_versions(QString date,QString n_date){
 
     if(n_year>year || n_month>month || n_day>day ){
        update=true;
+       updateAvalable = true;
     }
 
     if(update){
@@ -202,14 +217,14 @@ void Engine::compare_versions(QString date,QString n_date){
           msgBox.setDefaultButton(QMessageBox::Ok);
           QPushButton *p = new QPushButton("Quit",nullptr);
           msgBox.addButton(p,QMessageBox::NoRole);
-          msgBox.button(QMessageBox::Ok)->setText("Install");
+          msgBox.button(QMessageBox::Ok)->setText("Update");
           int ret = msgBox.exec();
           switch (ret) {
             case QMessageBox::Ok:
                   emit openSettingsAndClickDownload();
               break;
             case  QMessageBox::Cancel:
-                  check_engine_updates();
+//                  check_engine_updates();
               break;
             default:
               qApp->quit();
@@ -236,7 +251,7 @@ void Engine::evoke_engine_check(){
                   emit openSettingsAndClickDownload();
               break;
             case  QMessageBox::Cancel:
-                  evoke_engine_check();
+                  //evoke_engine_check();
               break;
             default:
                 qApp->quit();

@@ -135,6 +135,16 @@ void MainWindow::init_player()
     consoleUi.setupUi(consoleWidget);
     connect(consoleUi.textBrowser,&QTextBrowser::anchorClicked,[=](const QUrl link){
         qWarning()<<"clicked"<<link;
+        if(link.toString().contains("open://settings",Qt::CaseInsensitive)){
+            on_settingsButton_clicked();
+            return;
+        }
+
+        if(link.toString().contains("do://update",Qt::CaseInsensitive)){
+            emit settingsWidget->openSettingsAndClickDownload();
+            return;
+        }
+
         QProcess *xdg_open = new QProcess(this);
         xdg_open->start("xdg-open",QStringList()<<link.toString());
         if(xdg_open->waitForStarted(1000) == false){
@@ -506,6 +516,10 @@ void MainWindow::on_start_clicked()
         return;
     }
     //handle remote urls with engine
+    if(settingsWidget->engineReady()==false){
+        consoleUi.textBrowser->setText("<br><i style='color:red'>Media probe engine not present or not updated.<br><a style='color:skyblue' href='do://update'>Click to Update engine</a> or <a style='color:skyblue' href='open://settings'>Click to open Settings.</a></i><br>\n");
+        return;
+    }
     QString addin_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     QStringList args;
     args<<addin_path+"/core"<<"-f"<<"best"<<"-g"<<"--get-filename"<<resouceUrl;
@@ -1032,8 +1046,8 @@ void MainWindow::on_youtube_clicked()
         youtubeWidget->setWindowModality(Qt::NonModal);
         youtubeWidget->setMinimumSize(550,480);
         connect(youtubeWidget,&SearchProvider::loadVideo,[=](QString videoId){
-           ui->url->setText(videoId);
-           ui->start->click();
+                ui->url->setText(videoId);
+                ui->start->click();
         });
     }
 

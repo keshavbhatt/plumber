@@ -32,10 +32,12 @@ signals:
     void  engineDownloadSucceeded();
 
 public slots:
+
     void clearEngineCache();
 
     void download_engine_clicked();
 
+    bool engineReady();
 private slots:
     bool checkEngine();
 
@@ -50,6 +52,7 @@ private slots:
     void evoke_engine_check();
 
 private:
+    bool updateAvalable = false;
     QFile *core_file = nullptr;
 
     QString core_local_date,core_remote_date;
