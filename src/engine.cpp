@@ -1,5 +1,11 @@
 #include "engine.h"
 
+//"https://rg3.github.io/youtube-dl/update/LATEST_VERSION"
+QString ENGINE_VERSION_URL  = "http://ktechpit.com/USS/engine/core_version";
+//"https://yt-dl.org/downloads/latest/youtube-dl"
+QString ENGINE_DOWNLOAD_URL = "http://ktechpit.com/USS/engine/core.eco";
+
+
 Engine::Engine(QObject *parent) : QObject(parent)
 {
     QTimer::singleShot(1000, [this]() {
@@ -56,8 +62,7 @@ void Engine::download_engine_clicked()
 
     QNetworkAccessManager *m_netwManager = new QNetworkAccessManager(this);
     connect(m_netwManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(slot_netwManagerFinished(QNetworkReply*)));
-//    QUrl url("http://yt-dl.org/downloads/latest/youtube-dl");
-    QUrl url("http://ktechpit.com/USS/engine/core.eco");
+    QUrl url(ENGINE_DOWNLOAD_URL);
 
     QNetworkRequest request(url);
     m_netwManager->get(request);
@@ -156,8 +161,7 @@ void Engine::get_engine_version_info(){
         rep->deleteLater();
         m_netwManager->deleteLater();
     });
-//    QUrl url("https://rg3.github.io/youtube-dl/update/LATEST_VERSION");
-    QUrl url("http://ktechpit.com/USS/engine/core_version");
+    QUrl url(ENGINE_VERSION_URL);
 
     QNetworkRequest request(url);
     m_netwManager->get(request);
@@ -188,8 +192,7 @@ void Engine::check_engine_updates(){
         rep->deleteLater();
         m_netwManager->deleteLater();
     });
-//    QUrl url("https://rg3.github.io/youtube-dl/update/LATEST_VERSION");
-    QUrl url("http://ktechpit.com/USS/engine/core_version");
+    QUrl url(ENGINE_VERSION_URL);
 
     QNetworkRequest request(url);
     m_netwManager->get(request);
