@@ -619,10 +619,7 @@ void MainWindow::on_start_clicked() {
         QApplication::restoreOverrideCursor();
 #endif
       });
-  engineProcess->start("python", args);
-  if (!engineProcess->waitForStarted(500)) {
-    engineProcess->start("python3", args);
-  }
+  engineProcess->start("python3", args);
   if (engineProcess->waitForStarted(1000)) {
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::BusyCursor);
