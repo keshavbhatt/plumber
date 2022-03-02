@@ -1,9 +1,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <QWidget>
-#include <QSettings>
 #include <QProcess>
+#include <QSettings>
+#include <QWidget>
 
 #include "engine.h"
 
@@ -11,64 +11,64 @@ namespace Ui {
 class Settings;
 }
 
-class Settings : public QWidget
-{
-    Q_OBJECT
+class Settings : public QWidget {
+  Q_OBJECT
 
 public:
-    explicit Settings(QWidget *parent = nullptr);
-    ~Settings();
+  explicit Settings(QWidget *parent = nullptr);
+  ~Settings();
 signals:
-    void themeToggled();
+  void themeToggled();
 
-    void openSettingsAndClickDownload();
+  void openSettingsAndClickDownload();
 
 public slots:
 
-    void downloadEngine();
+  void downloadEngine();
 
-    void clearEngineCache();
+  void clearEngineCache();
 
-    bool engineReady();
+  bool engineReady();
 private slots:
 
-    void readSettings();
+  void readSettings();
 
-    void on_github_clicked();
+  void on_github_clicked();
 
-    void on_rate_clicked();
+  void on_rate_clicked();
 
-    void on_donate_clicked();
+  void on_donate_clicked();
 
-    void on_dark_toggled(bool checked);
+  void on_dark_toggled(bool checked);
 
-    void on_light_toggled(bool checked);
+  void on_light_toggled(bool checked);
 
-    void on_clear_engine_cache_clicked();
+  void on_clear_engine_cache_clicked();
 
-    void on_download_engine_clicked();
+  void on_download_engine_clicked();
 
-    void init_engine();
+  void init_engine();
 
-    void on_copy_toggled(bool checked);
+  void on_copy_toggled(bool checked);
 
-    void on_mpeg_toggled(bool checked);
+  void on_mpeg_toggled(bool checked);
 
-    void on_frameRate_valueChanged(const QString &arg1);
+  void on_frameRate_valueChanged(const QString &arg1);
 
-    void on_scale_valueChanged(const QString &arg1);
+  void on_scale_valueChanged(const QString &arg1);
 
-    void on_restore_clicked();
+  void on_restore_clicked();
 
-    void on_jpg_toggled(bool checked);
+  void on_jpg_toggled(bool checked);
 
-    void on_png_toggled(bool checked);
+  void on_png_toggled(bool checked);
+
 private:
-    Ui::Settings *ui;
+  Ui::Settings *ui;
 
-    QSettings settings;
+  QSettings settings;
 
-    Engine *engine = nullptr;
+  Engine *engine = nullptr;
 };
 
 #endif // SETTINGS_H

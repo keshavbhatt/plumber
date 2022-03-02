@@ -1,169 +1,168 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QSettings>
-#include <QFile>
 #include <QDebug>
+#include <QFile>
+#include <QMainWindow>
 #include <QMediaPlayer>
-#include <QVideoWidget>
-#include <QTime>
-#include <QToolTip>
 #include <QProcess>
 #include <QPushButton>
+#include <QSettings>
+#include <QTime>
+#include <QToolTip>
+#include <QVideoWidget>
 
-#include "error.h"
 #include "RangeSlider.h"
-#include "waitingspinnerwidget.h"
+#include "controlbutton.h"
+#include "error.h"
+#include "screenshot.h"
+#include "searchprovider.h"
 #include "settings.h"
 #include "ui_console.h"
 #include "utils.h"
-#include "controlbutton.h"
-#include "screenshot.h"
-#include "searchprovider.h"
-
+#include "waitingspinnerwidget.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
-    Q_PROPERTY(bool consoleHidden_ READ consoleHidden_ WRITE setConsoleHidden NOTIFY consoleVisibilityChanged)
+class MainWindow : public QMainWindow {
+  Q_OBJECT
+  Q_PROPERTY(bool consoleHidden_ READ consoleHidden_ WRITE setConsoleHidden
+                 NOTIFY consoleVisibilityChanged)
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+  explicit MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
 signals:
-    void consoleVisibilityChanged(const bool isVisible);
+  void consoleVisibilityChanged(const bool isVisible);
 
 private slots:
 
-    void setConsoleHidden(bool hidden);
+  void setConsoleHidden(bool hidden);
 
-    void setStyle(QString fname);
+  void setStyle(QString fname);
 
-    void updateDuration();
+  void updateDuration();
 
-    void showError(QString message);
+  void showError(QString message);
 
-    void init_player();
+  void init_player();
 
-    void on_url_textChanged(const QString &arg1);
+  void on_url_textChanged(const QString &arg1);
 
-    void on_start_clicked();
+  void on_start_clicked();
 
-    void on_pickStart_clicked();
+  void on_pickStart_clicked();
 
-    void on_pickEnd_clicked();
+  void on_pickEnd_clicked();
 
-    void on_play_clicked();
+  void on_play_clicked();
 
-    void on_minusOneSecLower_clicked();
+  void on_minusOneSecLower_clicked();
 
-    void on_plusOneSecLower_clicked();
+  void on_plusOneSecLower_clicked();
 
-    void on_minusOneSecUpper_clicked();
+  void on_minusOneSecUpper_clicked();
 
-    void on_plusOneSecUpper_clicked();
+  void on_plusOneSecUpper_clicked();
 
-    void on_volume_valueChanged(int value);
+  void on_volume_valueChanged(int value);
 
-    void on_moveToFrameLower_clicked();
+  void on_moveToFrameLower_clicked();
 
-    void on_moveToFrameUpper_clicked();
+  void on_moveToFrameUpper_clicked();
 
-    void on_preview_clicked();
+  void on_preview_clicked();
 
-    void on_settingsButton_clicked();
+  void on_settingsButton_clicked();
 
-    void on_vIcon_clicked();
+  void on_vIcon_clicked();
 
-    void init_settings();
+  void init_settings();
 
-    void resizeFix();
+  void resizeFix();
 
-    void playMedia(QString url);
+  void playMedia(QString url);
 
-    void on_changeLocationButton_clicked();
+  void on_changeLocationButton_clicked();
 
-    void on_location_textChanged(const QString &arg1);
+  void on_location_textChanged(const QString &arg1);
 
-    void on_clip_clicked();
+  void on_clip_clicked();
 
-    QString getCodec();
+  QString getCodec();
 
-    void on_cancel_clicked();
+  void on_cancel_clicked();
 
-    void showConsole();
+  void showConsole();
 
-    void hideConsole();
+  void hideConsole();
 
-    void on_video_toggled(bool checked);
+  void on_video_toggled(bool checked);
 
-    void on_gif_toggled(bool checked);
+  void on_gif_toggled(bool checked);
 
-    void showStatus(QString message);
+  void showStatus(QString message);
 
-    void on_selectLocal_clicked();
+  void on_selectLocal_clicked();
 
-    bool clipOptionChecker();
+  bool clipOptionChecker();
 
+  void on_screenshotLowerFrame_clicked();
 
-    void on_screenshotLowerFrame_clicked();
+  void on_screenshotUpperFrame_clicked();
 
-    void on_screenshotUpperFrame_clicked();
-
-    void takeScreenshot();
-    void on_youtube_clicked();
+  void takeScreenshot();
+  void on_youtube_clicked();
 
 protected slots:
-    void resizeEvent(QResizeEvent *event);
+  void resizeEvent(QResizeEvent *event);
 
-    void closeEvent(QCloseEvent *event);
+  void closeEvent(QCloseEvent *event);
+
 private:
-    Ui::MainWindow *ui;
+  Ui::MainWindow *ui;
 
-    Ui::consoleUi consoleUi;
+  Ui::consoleUi consoleUi;
 
-    QWidget *consoleWidget = nullptr;
+  QWidget *consoleWidget = nullptr;
 
-    QSettings settings;
+  QSettings settings;
 
-    RangeSlider *rsH;
+  RangeSlider *rsH;
 
-    QMediaPlayer *player = nullptr;
+  QMediaPlayer *player = nullptr;
 
-    Error * _error = nullptr;
+  Error *_error = nullptr;
 
-    WaitingSpinnerWidget *_loader = nullptr;
+  WaitingSpinnerWidget *_loader = nullptr;
 
-    int tempVolume;
+  int tempVolume;
 
-    Settings *settingsWidget = nullptr;
+  Settings *settingsWidget = nullptr;
 
-    QProcess *engineProcess = nullptr;
+  QProcess *engineProcess = nullptr;
 
-    QProcess *ffmpegProcess = nullptr;
+  QProcess *ffmpegProcess = nullptr;
 
-    QProcess *screenshotProcess = nullptr;
+  QProcess *screenshotProcess = nullptr;
 
-    bool isPlayingPreview = false;
+  bool isPlayingPreview = false;
 
-    bool consoleHidden_() const;
+  bool consoleHidden_() const;
 
-    bool consoleHidden;
+  bool consoleHidden;
 
-    controlButton *consoleButton = nullptr;
+  controlButton *consoleButton = nullptr;
 
-    QString currentFileName;
+  QString currentFileName;
 
-    Screenshot *screenshot = nullptr;
+  Screenshot *screenshot = nullptr;
 
-    int forbiddenRetryCount = 0;
+  int forbiddenRetryCount = 0;
 
-    SearchProvider *youtubeWidget = nullptr;
+  SearchProvider *youtubeWidget = nullptr;
 };
 
 #endif // MAINWINDOW_H

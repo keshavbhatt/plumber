@@ -1,37 +1,36 @@
 #ifndef SCREENSHOT_H
 #define SCREENSHOT_H
 
-#include <QWidget>
 #include <QSettings>
+#include <QWidget>
 
 namespace Ui {
 class Screenshot;
 }
 
-class Screenshot : public QWidget
-{
-    Q_OBJECT
+class Screenshot : public QWidget {
+  Q_OBJECT
 
 public:
-    explicit Screenshot(QWidget *parent = nullptr, QString image_location="");
-    ~Screenshot();
-    bool savedSc = false;
+  explicit Screenshot(QWidget *parent = nullptr, QString image_location = "");
+  ~Screenshot();
+  bool savedSc = false;
 signals:
-    void savedScreenshot(QString fileLocation);
-    void failedToSaveSc();
+  void savedScreenshot(QString fileLocation);
+  void failedToSaveSc();
 
 protected slots:
-    void closeEvent(QCloseEvent *event);
+  void closeEvent(QCloseEvent *event);
 
 private slots:
-    void on_filename_textChanged(const QString &arg1);
+  void on_filename_textChanged(const QString &arg1);
 
-    void on_save_clicked();
+  void on_save_clicked();
 
 private:
-    Ui::Screenshot *ui;
-    QSettings settings;
-    QString image_location,filenameComplete,ext;
+  Ui::Screenshot *ui;
+  QSettings settings;
+  QString image_location, filenameComplete, ext;
 };
 
 #endif // SCREENSHOT_H
