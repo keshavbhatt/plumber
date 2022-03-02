@@ -1,61 +1,70 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <QObject>
-#include <QStandardPaths>
-#include <QSettings>
-#include <QMessageBox>
-#include <QtNetwork>
+#include <QApplication>
 #include <QFile>
 #include <QFileInfo>
-#include <QApplication>
-#include <QPushButton>
+#include <QMessageBox>
+#include <QObject>
 #include <QProcess>
+#include <QPushButton>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QtNetwork>
 
-class Engine : public QObject
-{
-    Q_OBJECT
+#include "utils.h"
+
+class Engine : public QObject {
+  Q_OBJECT
 public:
-    explicit Engine(QObject *parent = nullptr);
+  explicit Engine(QObject *parent = nullptr);
 
 signals:
-    void  engineStatus(QString status);
+  void engineStatus(QString status);
 
-    void  engineCacheCleared();
+  void engineCacheCleared();
 
-    void  errorMessage(QString errorMessage);
+  void errorMessage(QString errorMessage);
 
-    void  openSettingsAndClickDownload();
+  void openSettingsAndClickDownload();
 
-    void  engineDownloadFailed(QString errorMessage);
+  void engineDownloadFailed(QString errorMessage);
 
-    void  engineDownloadSucceeded();
+  void engineDownloadSucceeded();
+
+  void showSettingsTab(bool scrollToEngine);
 
 public slots:
+  void clearEngineCache();
 
-    void clearEngineCache();
+  void download_engine_clicked();
 
-    void download_engine_clicked();
+  static QString enginePath();
 
-    bool engineReady();
+  bool engineReady();
 private slots:
-    bool checkEngine();
+  bool checkEngine();
 
-    void slot_netwManagerFinished(QNetworkReply *reply);
+  void slot_netwManagerFinished(QNetworkReply *reply);
 
-    void get_engine_version_info();
+  void get_engine_version_info();
 
-    void check_engine_updates();
+  void check_engine_updates();
 
-    void compare_versions(QString date, QString n_date);
+  void compare_versions(QString date, QString n_date);
 
-    void evoke_engine_check();
+  void evoke_engine_check();
+
+  void EngineVersionFromEngine(bool afterUpdate = false);
 
 private:
-    bool updateAvalable = false;
-    QFile *core_file = nullptr;
+  bool updateAvalable = false;
 
-    QString core_local_date,core_remote_date;
+  QFile *core_file = nullptr;
+
+  QString core_local_date, core_remote_date;
+
+  QString m_engine_version;
 };
 
 #endif // ENGINE_H

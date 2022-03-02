@@ -1,9 +1,20 @@
 #include "engine.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+
 //"https://rg3.github.io/youtube-dl/update/LATEST_VERSION"
-QString ENGINE_VERSION_URL = "http://ktechpit.com/USS/engine/core_version";
+//"https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
+//"http://ktechpit.com/USS/engine/core_version"
+QString ENGINE_VERSION_URL =
+    "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest";
+
 //"https://yt-dl.org/downloads/latest/youtube-dl"
-QString ENGINE_DOWNLOAD_URL = "http://ktechpit.com/USS/engine/core.eco";
+//"https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
+//"http://ktechpit.com/USS/engine/core.eco"
+QString ENGINE_DOWNLOAD_URL =
+    "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp";
 
 Engine::Engine(QObject *parent) : QObject(parent) {
   QTimer::singleShot(1000, [this]() {
@@ -11,6 +22,7 @@ Engine::Engine(QObject *parent) : QObject(parent) {
       evoke_engine_check();
       return;
     } else {
+      EngineVersionFromEngine();
       check_engine_updates();
     }
   });
@@ -44,8 +56,7 @@ bool Engine::checkEngine() {
 }
 
 void Engine::download_engine_clicked() {
-  //    settingsUi.download_engine->setEnabled(false);
-  emit engineStatus("Downloading...");
+
   QString addin_path =
       QStandardPaths::writableLocation(QStandardPaths::DataLocation);
   QDir dir(addin_path);
@@ -53,18 +64,27 @@ void Engine::download_engine_clicked() {
     dir.mkpath(addin_path);
 
   QString filename = "core";
-  core_file = new QFile(addin_path + "/" + filename); // addin_path
+  core_file = new QFile(addin_path + "/" + filename);
   if (!core_file->open(QIODevice::ReadWrite | QIODevice::Truncate)) {
-    qDebug() << "Could not open a file to write.";
+    qWarning() << "could not open engine file to write";
   }
 
   QNetworkAccessManager *m_netwManager = new QNetworkAccessManager(this);
   connect(m_netwManager, SIGNAL(finished(QNetworkReply *)), this,
           SLOT(slot_netwManagerFinished(QNetworkReply *)));
   QUrl url(ENGINE_DOWNLOAD_URL);
-
   QNetworkRequest request(url);
+
+  emit engineStatus("Downloading...");
+  qWarning() << "downloading engine...";
+
   m_netwManager->get(request);
+}
+
+QString Engine::enginePath() {
+  QString addin_path =
+      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+  return addin_path + "/" + "core";
 }
 
 void Engine::slot_netwManagerFinished(QNetworkReply *reply) {
@@ -81,6 +101,7 @@ void Engine::slot_netwManagerFinished(QNetworkReply *reply) {
         get_engine_version_info();
         checkEngine();
         emit engineDownloadSucceeded();
+        EngineVersionFromEngine(true);
       } else {
         core_file->remove();
       }
@@ -102,7 +123,7 @@ void Engine::slot_netwManagerFinished(QNetworkReply *reply) {
   } else // error
   {
     QString err = reply->errorString();
-    if (err.contains("not")) { // to hide "Host yt-dl.org not found"
+    if (err.contains("not found")) {
       emit engineStatus("Host not Found");
     } else if (err.contains("session") || err.contains("disabled")) {
       emit engineStatus(err);
@@ -114,7 +135,7 @@ void Engine::slot_netwManagerFinished(QNetworkReply *reply) {
   reply->deleteLater();
 }
 
-// funtion used to clear engine cache, to prevent 403 and 429 issue.
+// function used to clear engine cache, to prevent 403 and 429 issue.
 void Engine::clearEngineCache() {
   QProcess *clear_engine_cache = new QProcess(this);
   QString addin_path =
@@ -124,26 +145,25 @@ void Engine::clearEngineCache() {
               &QProcess::finished),
           [clear_engine_cache, this](int exitCode,
                                      QProcess::ExitStatus exitStatus) {
+            Q_UNUSED(exitStatus);
             if (checkEngine() == true) {
               if (exitCode == 0) {
                 emit engineCacheCleared();
               } else {
-                emit errorMessage(exitStatus + " | " +
-                                  clear_engine_cache->readAll());
+                emit errorMessage(QString(
+                    QString("Error occured while clearing engine cache") +
+                    clear_engine_cache->readAll()));
+                emit engineCacheCleared(); // fake UI fixer
               }
             } else {
               emit errorMessage("Engine not present download engine first");
               emit engineStatus("Absent");
               emit engineCacheCleared(); // fake UI fixer
             }
-
           });
-  clear_engine_cache->start("python", QStringList() << addin_path + "/core"
-                                                    << "--rm-cache-dir");
-  if (clear_engine_cache->waitForStarted(1000)) {
-    clear_engine_cache->start("python3", QStringList() << addin_path + "/core"
+
+  clear_engine_cache->start("python3", QStringList() << addin_path + "/core"
                                                        << "--rm-cache-dir");
-  }
 }
 
 // writes core_version file with version info after core downloaded
@@ -165,21 +185,29 @@ void Engine::get_engine_version_info() {
                                        QIODevice::Truncate)) {
             qDebug() << "Could not open a core_version_file to write.";
           }
-          core_version_file->write(rep->readAll());
+          QString replyStr = rep->readAll();
+          QString version;
+
+          if (rep->request().url().toString().contains("api.")) {
+            QJsonDocument doc = QJsonDocument::fromJson(replyStr.toUtf8());
+            if (doc.isNull() == false) {
+              QJsonObject obj = doc.object();
+              version = obj.value("tag_name").toString().trimmed();
+            }
+          }
+          // qDebug()<<"VERSION STR"<<version;
+          core_version_file->write(version.toUtf8());
           core_version_file->close();
           core_version_file->deleteLater();
         }
         rep->deleteLater();
         m_netwManager->deleteLater();
       });
-  QUrl url(ENGINE_VERSION_URL);
-
-  QNetworkRequest request(url);
+  QNetworkRequest request(ENGINE_VERSION_URL);
   m_netwManager->get(request);
 }
 
 void Engine::check_engine_updates() {
-
   // read version from local core_version file
   QString addin_path =
       QStandardPaths::writableLocation(QStandardPaths::DataLocation);
@@ -197,21 +225,35 @@ void Engine::check_engine_updates() {
   connect(m_netwManager, &QNetworkAccessManager::finished,
           [=](QNetworkReply *rep) {
             if (rep->error() == QNetworkReply::NoError) {
-              core_remote_date = rep->readAll().trimmed();
+              QString replyStr = rep->readAll();
+              if (rep->request().url().toString().contains("api.")) {
+                QJsonDocument doc = QJsonDocument::fromJson(replyStr.toUtf8());
+                if (doc.isNull() == false) {
+                  QJsonObject obj = doc.object();
+                  core_remote_date = obj.value("tag_name").toString().trimmed();
+                }
+              } else {
+                core_remote_date = replyStr.trimmed();
+              }
+
               if (!core_local_date.isNull() && !core_remote_date.isNull()) {
                 compare_versions(core_local_date, core_remote_date);
               }
+            } else {
+              qWarning() << "update check failed";
             }
             rep->deleteLater();
             m_netwManager->deleteLater();
           });
   QUrl url(ENGINE_VERSION_URL);
-
   QNetworkRequest request(url);
+  qWarning() << "checking for engine updates...";
   m_netwManager->get(request);
 }
 
 void Engine::compare_versions(QString date, QString n_date) {
+
+  qWarning() << "installed version: " + date + " remote version: " + n_date;
 
   int year, month, day, n_year, n_month, n_day;
 
@@ -223,38 +265,29 @@ void Engine::compare_versions(QString date, QString n_date) {
   n_month = QDate::fromString(n_date, Qt::ISODate).month();
   n_day = QDate::fromString(n_date, Qt::ISODate).day();
 
-  bool update = false;
-
   if (n_year > year || n_month > month || n_day > day) {
-    update = true;
     updateAvalable = true;
-  }
-
-  if (update) {
+    qWarning() << "engine update available( ver: " + n_date + ")";
     QMessageBox msgBox;
     msgBox.setText("" + QApplication::applicationName() +
-                   " requires an updated version of its video download engine. "
-                   "Would you like to install the updated version now?");
+                   " Engine update (<b>ver: " + n_date + "</b>) available!");
     msgBox.setIconPixmap(
-        QPixmap(":/icons/sidebar/info.png")
+        QPixmap(":/icons/information-line.png")
             .scaled(42, 42, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    msgBox.setInformativeText("Choose Install to download and install the "
-                              "modified version of youtube-dl (1.4MB). Cancel "
-                              "will proceed with the existing engine version "
-                              "(" +
-                              date + "), which may not work successfully.");
+    msgBox.setInformativeText("You are having an outdated engine (<b>ver: " +
+                              date + "</b>), please update to latest engine "
+                                     "for better performance. Update now?");
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Ok);
     QPushButton *p = new QPushButton("Quit", nullptr);
     msgBox.addButton(p, QMessageBox::NoRole);
-    msgBox.button(QMessageBox::Ok)->setText("Update");
     int ret = msgBox.exec();
     switch (ret) {
     case QMessageBox::Ok:
       emit openSettingsAndClickDownload();
       break;
     case QMessageBox::Cancel:
-      //                  check_engine_updates();
+      // check_engine_updates();
       break;
     default:
       qApp->quit();
@@ -264,35 +297,62 @@ void Engine::compare_versions(QString date, QString n_date) {
 }
 
 void Engine::evoke_engine_check() {
+  qWarning() << "looking for installed engine binary...";
   if (checkEngine() == false) {
     QMessageBox msgBox;
     msgBox.setText("" + QApplication::applicationName() +
-                   " requires an updated version of its video download engine. "
-                   "Would you like to install the updated version now?");
+                   " needs to download it's engine which is responsible for "
+                   "finding media online");
     msgBox.setIconPixmap(
-        QPixmap(":/icons/sidebar/info.png")
+        QPixmap(":/icons/information-line.png")
             .scaled(42, 42, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    msgBox.setInformativeText("Choose Install to download and install the "
-                              "modified version of youtube-dl (1.4MB). Cancel "
-                              "will proceed with the existing engine version, "
-                              "which may not work successfully.");
+    msgBox.setInformativeText("The " + QApplication::applicationName() +
+                              " engine (1.4Mb & is based on youtube-dl with "
+                              "some modifications), is missing, do you want to "
+                              "download it now?");
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     QPushButton *p = new QPushButton("Quit", nullptr);
     msgBox.addButton(p, QMessageBox::NoRole);
     msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.button(QMessageBox::Ok)->setText("Install");
 
-    int ret = msgBox.exec();
-    switch (ret) {
+    switch (msgBox.exec()) {
     case QMessageBox::Ok:
       emit openSettingsAndClickDownload();
       break;
     case QMessageBox::Cancel:
-      // evoke_engine_check();
+      evoke_engine_check();
       break;
     default:
       qApp->quit();
       break;
     }
   }
+}
+
+void Engine::EngineVersionFromEngine(bool afterUpdate) {
+  if (checkEngine() == false)
+    return;
+  QProcess *vprocess = new QProcess(this);
+  connect(vprocess, &QProcess::readyRead, [=]() {
+    m_engine_version = vprocess->readAll();
+    if (afterUpdate) {
+      qWarning() << "engine updated to version: " + m_engine_version;
+    } else {
+      qWarning() << "installed engine version: " + m_engine_version;
+    }
+  });
+  connect(vprocess, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+                        &QProcess::finished),
+          [=](int exitCode, QProcess::ExitStatus exitStatus) {
+            Q_UNUSED(exitCode)
+            if (exitStatus != QProcess::NormalExit) {
+              qWarning() << "failed while getting engine version information";
+            }
+          });
+
+  QString setting_path =
+      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+  qWarning() << "checking local engine version information";
+  vprocess->start("python3", QStringList() << setting_path + "/core"
+                                             << "--version");
 }
