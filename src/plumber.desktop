@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+GenericName=Media trimming/Video to GIF
+Comment=Trim media
+Name=Plumber
+Type=Application
+Icon=plumber
+Keywords=Clip;Video;Downloader;Gif
+Exec=plumber %F
+Categories=AudioVideo;Utility;Qt;
+Terminal=false
+Name[en_US]=plumber
