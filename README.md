@@ -1,9 +1,9 @@
 # Plumber is a media clipping tool for Linux Desktop
 <p align="center">
-  <img width="200" height="200" src="https://github.com/keshavbhatt/plumber/blob/master/icon.png?raw=true">
+  <img width="200" height="200" src="https://github.com/keshavbhatt/plumber/blob/master/app/icon-256.png?raw=true">
 </p>
 
-## Main Features of Plumber :
+## Main features of Plumber trimmer:
 
 * Plumber allows you to trim/crop online video/audio files without downloading them completely.
 * Plumber lets you precisely crop media files (both local and remote). Trim media files with precision of 1 second.
@@ -18,19 +18,17 @@
 ![Plumber Dark theme](https://github.com/keshavbhatt/plumber/blob/master/images/1.jpg?raw=true)
 
 ![Plumber Light theme](https://github.com/keshavbhatt/plumber/blob/master/images/2.jpg?raw=true)
-## Download Linux here :
-Red can be installed on all Linux Desktop supporting snapd
-Via command line app can be simply installed with following command:
 
-    snap install plumber
+## Install Plumber media trimmer on Linux Desktop:
+Plumber can be installed on all Linux Desktops that support snapd
+Issue the following command to install Plumber:
+
+`snap install plumber`
+
 ## Snapstore Store link:
 [![plumber](https://snapcraft.io/plumber/trending.svg)](https://snapcraft.io/plumber)[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/plumber)
 
 ## Credits :
 "Plumber" the name of this application was suggeted by 
- [Simon Butcher](https://github.com/sbutcher) I thanks Simon for this :) 
-
-<hr>
- Version for Windows coming soon... Stay tuned for updates :)
-<hr>
+ [Simon Butcher](https://github.com/sbutcher) I thanks Simon :) 
 
