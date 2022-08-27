@@ -11,6 +11,30 @@ Settings::Settings(QWidget *parent) : QWidget(parent), ui(new Ui::Settings) {
   init_engine();
   ui->frameRate->setSuffix(" fps");
   ui->scale->setSuffix(" px");
+  updateAbout();
+}
+
+void Settings::updateAbout() {
+  QString aboutStr = R"(
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><meta charset="utf-8" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+</style></head><body style="text-align:center; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-size:11pt;"><br /></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-size:11pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><img src=":/icons/app/icon-64.png" /></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-size:11pt;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Ubuntu'; font-size:11pt;">Designed and Developed</span></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Ubuntu'; font-size:11pt;">by </span><span style=" font-family:'Ubuntu'; font-size:11pt; font-weight:600;">Keshav Bhatt</span><span style=" font-family:'Ubuntu'; font-size:11pt;"> &lt;keshavnrj@gmail.com&gt;</span></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Ubuntu'; font-size:11pt;">Website: https://ktechpit.com</span></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Ubuntu'; font-size:11pt;">Runtime: %1</span></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Ubuntu'; font-size:11pt;">Version: %2</span></p>
+<p><a style='color: silver' href='https://snapcraft.io/search?q=keshavnrj'>More Applications</a></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Ubuntu'; font-size:11pt;"><br /></p></body></html>
+    )";
+
+  ui->aboutTextBrowser->setHtml(aboutStr.arg(qVersion(),VERSIONSTR));
 }
 
 // public method to call clear engine cache.
@@ -172,4 +196,8 @@ void Settings::on_restore_clicked() {
   ui->frameRate->setValue(10);
   ui->scale->setValue(320);
   ui->mpeg->setChecked(true);
+}
+
+void Settings::on_aboutTextBrowser_anchorClicked(const QUrl &arg1) {
+  QDesktopServices::openUrl(QUrl(arg1));
 }

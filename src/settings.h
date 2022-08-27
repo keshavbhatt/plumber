@@ -63,6 +63,9 @@ private slots:
 
   void on_png_toggled(bool checked);
 
+  void updateAbout();
+  void on_aboutTextBrowser_anchorClicked(const QUrl &arg1);
+
 private:
   Ui::Settings *ui;
 

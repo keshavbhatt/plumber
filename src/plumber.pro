@@ -27,7 +27,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 # Set program version
-VERSION = 2.0
+VERSION = 3.0
 DEFINES += VERSIONSTR=\\\"$${VERSION}\\\"
 
 SOURCES += \

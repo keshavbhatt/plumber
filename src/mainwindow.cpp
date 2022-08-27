@@ -5,7 +5,6 @@
 #include <QFileDialog>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
-#include <QPropertyAnimation>
 #include <QScreen>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -72,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->rangeLayout->addWidget(rsH);
 
   ui->url->setText(
-      settings.value("lastUrl", "https://www.youtube.com/watch?v=NtXMOJGkous")
+      settings.value("lastUrl", "https://www.youtube.com/watch?v=UagCcZ-CheM")
           .toString()
           .trimmed()
           .simplified());
@@ -85,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
   consoleButton->setToolTip("Hide console");
   consoleButton->setIconSize(QSize(10, 10));
   consoleButton->setStyleSheet("border:none");
-  connect(consoleButton, &controlButton::clicked, [=]() {
+  connect(consoleButton, &controlButton::clicked, consoleButton, [=]() {
     if (consoleHidden_() == true) {
       showConsole();
     } else {
@@ -102,19 +101,19 @@ MainWindow::MainWindow(QWidget *parent)
       });
 
   setConsoleHidden(false);
-  showStatus("<html><head/><body style='color:lightgray'><p "
-             "align='center'><br>Welcome to " +
-             utils::toCamelCase(QApplication::applicationName()) +
-             "</p><p align='center'>version : " +
-             QApplication::applicationVersion() +
-             "</p><p align='center'>Developed by- Keshav Bhatt</p><p "
-             "align='center'><a style='color: lightgray' "
-             "href='mailto:keshavnrj@gmail.com?subject=" +
-             utils::toCamelCase(QApplication::applicationName()) +
-             "'>keshavnrj@gmail.com</a></p>"
-             "<p align='center'><a style='color: lightgray' "
-             "href='https://snapcraft.io/search?q=keshavnrj'>More "
-             "Applications</a></p></body></html>");
+  showStatus(
+      "<html><head/><body style='color:lightgray'><p "
+      "align='center'><br>Welcome to " +
+      utils::toCamelCase(QApplication::applicationName()) +
+      "</p><p align='center'>version : " + QApplication::applicationVersion() +
+      "</p><p align='center'>Developed by- Keshav Bhatt</p><p "
+      "align='center'><a style='color: lightgray' "
+      "href='mailto:keshavnrj@gmail.com?subject=" +
+      utils::toCamelCase(QApplication::applicationName()) +
+      "'>keshavnrj@gmail.com</a></p>"
+      "<p align='center'><a style='color: lightgray' "
+      "href='https://snapcraft.io/search?q=keshavnrj'>More "
+      "Applications</a></p></body></html>");
 
   if (settings.value("geometry").isValid()) {
     restoreGeometry(settings.value("geometry").toByteArray());
@@ -276,15 +275,15 @@ void MainWindow::init_player() {
     if (state == QMediaPlayer::PlayingState ||
         state == QMediaPlayer::StoppedState)
       _loader->stop();
-    ui->play->setIcon(QIcon(
-        state == (QMediaPlayer::PlayingState || QMediaPlayer::BufferedMedia)
-            ? ":/icons/pause-line.png"
-            : ":/icons/play-line.png"));
+    ui->play->setIcon(QIcon(state == (QMediaPlayer::PlayingState) ||
+                                    state == (QMediaPlayer::BufferedMedia)
+                                ? ":/icons/pause-line.png"
+                                : ":/icons/play-line.png"));
     if (isPlayingPreview)
-      ui->preview->setIcon(QIcon(
-          state == (QMediaPlayer::PlayingState || QMediaPlayer::BufferedMedia)
-              ? ":/icons/pause-line.png"
-              : ":/icons/play-line.png"));
+      ui->preview->setIcon(QIcon(state == (QMediaPlayer::PlayingState) ||
+                                         state == (QMediaPlayer::BufferedMedia)
+                                     ? ":/icons/pause-line.png"
+                                     : ":/icons/play-line.png"));
   });
 
   connect(player, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
@@ -513,7 +512,8 @@ void MainWindow::on_start_clicked() {
     QString srcFileName =
         QString(ui->url->text().trimmed().simplified()).remove("file://");
     QString destFileName = tempPath + temFileName;
-    if (QFileInfo(srcFileName).exists()) {
+    QFileInfo fi(srcFileName);
+    if (fi.exists()) {
       if (QFile::copy(srcFileName, destFileName)) {
 #ifndef QT_NO_CURSOR
         QApplication::restoreOverrideCursor();
@@ -565,60 +565,61 @@ void MainWindow::on_start_clicked() {
        << "-g"
        << "--get-filename" << resouceUrl;
   engineProcess = new QProcess(this);
-  connect(
-      engineProcess, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
-                         &QProcess::finished),
-      [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        if (exitCode == 0) {
-          Q_UNUSED(exitStatus);
-          QString output = engineProcess->readAll();
-          qDebug() << output;
-          if (output.contains("http", Qt::CaseInsensitive)) {
-            consoleUi.textBrowser->append("<br><i "
-                                          "style='color:lightgreen'>Media "
-                                          "probe finished.</i><br>\n");
-            consoleUi.textBrowser->append(
-                "<i style='color:lightgreen'>Loading media...</i>\n");
-            QTimer::singleShot(1500, [=]() {
-              _loader->start();
-              playMedia(output.split("\n").first().trimmed().simplified());
-            });
-            QRegExp rx("\\n\\w");
-            if (output.contains(rx)) {
-              QString name = rx.capturedTexts().first().trimmed() +
-                             output.split(rx).last().trimmed().simplified();
-              ui->clipname->setText(name.left(name.lastIndexOf(".")));
+  connect(engineProcess,
+          static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+              &QProcess::finished),
+          engineProcess, [this](int exitCode, QProcess::ExitStatus exitStatus) {
+            if (exitCode == 0) {
+              Q_UNUSED(exitStatus);
+              QString output = engineProcess->readAll();
+              qDebug() << output;
+              if (output.contains("http", Qt::CaseInsensitive)) {
+                consoleUi.textBrowser->append("<br><i "
+                                              "style='color:lightgreen'>Media "
+                                              "probe finished.</i><br>\n");
+                consoleUi.textBrowser->append(
+                    "<i style='color:lightgreen'>Loading media...</i>\n");
+                QTimer::singleShot(1500, [=]() {
+                  _loader->start();
+                  playMedia(output.split("\n").first().trimmed().simplified());
+                });
+                QRegExp rx("\\n\\w");
+                if (output.contains(rx)) {
+                  QString name = rx.capturedTexts().first().trimmed() +
+                                 output.split(rx).last().trimmed().simplified();
+                  ui->clipname->setText(name.left(name.lastIndexOf(".")));
+                } else {
+                  ui->clipname->setText(utils::generateRandomId(10));
+                }
+                ui->video->setEnabled(true);
+                ui->gif->setEnabled(true);
+                currentFileName = ui->clipname->text();
+
+                QString mode = settings.value("mode", "video").toString();
+
+                ui->video->toggle();
+                ui->gif->toggle();
+
+                ui->video->setChecked(mode == "video");
+                ui->gif->setChecked(mode == "gif");
+              } else {
+                if (output.contains("forbidden", Qt::CaseInsensitive)) {
+                  settingsWidget->clearEngineCache();
+                }
+                consoleUi.textBrowser->setText(output);
+              }
             } else {
-              ui->clipname->setText(utils::generateRandomId(10));
+              consoleUi.textBrowser->append("<br><i style='color:red'>An error "
+                                            "occured while processing your "
+                                            "request</i>\n");
+              showError("Process exited with code " +
+                        QString::number(exitCode) + "\n" +
+                        engineProcess->readAllStandardError());
             }
-            ui->video->setEnabled(true);
-            ui->gif->setEnabled(true);
-            currentFileName = ui->clipname->text();
-
-            QString mode = settings.value("mode", "video").toString();
-
-            ui->video->toggle();
-            ui->gif->toggle();
-
-            ui->video->setChecked(mode == "video");
-            ui->gif->setChecked(mode == "gif");
-          } else {
-            if (output.contains("forbidden", Qt::CaseInsensitive)) {
-              settingsWidget->clearEngineCache();
-            }
-            consoleUi.textBrowser->setText(output);
-          }
-        } else {
-          consoleUi.textBrowser->append("<br><i style='color:red'>An error "
-                                        "occured while processing your "
-                                        "request</i>\n");
-          showError("Process exited with code " + QString::number(exitCode) +
-                    "\n" + engineProcess->readAllStandardError());
-        }
 #ifndef QT_NO_CURSOR
-        QApplication::restoreOverrideCursor();
+            QApplication::restoreOverrideCursor();
 #endif
-      });
+          });
   engineProcess->start("python3", args);
   if (engineProcess->waitForStarted(1000)) {
 #ifndef QT_NO_CURSOR
@@ -800,6 +801,9 @@ void MainWindow::on_changeLocationButton_clicked() {
       this, tr("Select destination directory"), path,
       QFileDialog::ShowDirsOnly);
   QFileInfo dir(destination);
+  if (destination.isEmpty()) {
+    return;
+  }
   if (dir.isWritable()) {
     ui->location->setText(destination);
   } else {
@@ -842,7 +846,7 @@ void MainWindow::on_clip_clicked() {
   if (settings.value("mode", "video").toString() == "video") {
     args << "-c"
          << "ffmpeg -async 1 -ss " + ui->startDur->text().trimmed() + " -i \"" +
-                player->media().canonicalUrl().toString() + "\" -t " +
+                player->media().request().url().toString() + "\" -t " +
                 ui->clip_duration->text().trimmed() + getCodec() + +"\"" +
                 ui->location->text().trimmed() + "/" +
                 ui->clipname->text().trimmed() + "\" -y";
@@ -850,11 +854,12 @@ void MainWindow::on_clip_clicked() {
     args << "-c"
          << "ffmpeg -ss " + ui->startDur->text().trimmed() + " -t " +
                 ui->clip_duration->text().trimmed() + " -i \"" +
-                player->media().canonicalUrl().toString() + "\" -vf \"fps=" +
-                fps + ",scale=" + scale + ":-1:flags="
-                                          "lanczos,split[s0][s1];[s0]"
-                                          "palettegen[p];[s1][p]paletteuse\" "
-                                          "-loop 0 \"" +
+                player->media().request().url().toString() +
+                "\" -vf \"fps=" + fps + ",scale=" + scale +
+                ":-1:flags="
+                "lanczos,split[s0][s1];[s0]"
+                "palettegen[p];[s1][p]paletteuse\" "
+                "-loop 0 \"" +
                 ui->location->text().trimmed() + "/" +
                 ui->clipname->text().trimmed() + "\" -y";
   }
@@ -868,8 +873,9 @@ void MainWindow::on_clip_clicked() {
                                     output.replace("\n", "<br>") + "</i>");
   });
   connect(
-      ffmpegProcess, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
-                         &QProcess::finished),
+      ffmpegProcess,
+      static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+          &QProcess::finished),
       [this](int exitCode, QProcess::ExitStatus exitStatus) {
         Q_UNUSED(exitStatus);
         if (exitCode == 0) {
@@ -1032,12 +1038,13 @@ void MainWindow::takeScreenshot() {
   qDebug() << fileLocation;
   QStringList args;
   args << "-c"
-       << "ffmpeg -ss " + QString(isUpper ? ui->endDur->text().trimmed()
-                                          : ui->startDur->text().trimmed()) +
-              " -i \"" + player->media().canonicalUrl().toString() +
+       << "ffmpeg -ss " +
+              QString(isUpper ? ui->endDur->text().trimmed()
+                              : ui->startDur->text().trimmed()) +
+              " -i \"" + player->media().request().url().toString() +
               "\" -vframes 1 \"" + fileLocation + "\" -y";
   screenshotProcess = new QProcess(this);
-  connect(screenshotProcess, &QProcess::readyRead, [=]() {
+  connect(screenshotProcess, &QProcess::readyRead, screenshotProcess, [=]() {
     QString output = screenshotProcess->readAll();
     showConsole();
     if (output.contains("frame= ", Qt::CaseInsensitive))
@@ -1047,6 +1054,7 @@ void MainWindow::takeScreenshot() {
   connect(screenshotProcess,
           static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
               &QProcess::finished),
+          screenshotProcess,
           [this, fileLocation](int exitCode, QProcess::ExitStatus exitStatus) {
             Q_UNUSED(exitStatus);
 #ifndef QT_NO_CURSOR
@@ -1060,7 +1068,7 @@ void MainWindow::takeScreenshot() {
               screenshot->setAttribute(Qt::WA_DeleteOnClose);
               screenshot->setWindowModality(Qt::ApplicationModal);
               screenshot->setWindowFlag(Qt::Dialog);
-              connect(screenshot, &Screenshot::savedScreenshot,
+              connect(screenshot, &Screenshot::savedScreenshot, screenshot,
                       [=](QString screenshotLocation) {
                         consoleUi.textBrowser->append(
                             "\n<i style='color:lightgreen'>Screenshot taken "
