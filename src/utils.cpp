@@ -3,7 +3,7 @@
 
 utils::utils(QObject *parent) : QObject(parent) { setParent(parent); }
 
-utils::~utils() { this->deleteLater(); }
+utils::~utils() { }
 
 // calculate dir size
 quint64 utils::dir_size(const QString &directory) {

@@ -163,7 +163,7 @@ void MainWindow::init_player() {
         QProcess *xdg_open = new QProcess(this);
         xdg_open->start("xdg-open", QStringList() << link.toString());
         if (xdg_open->waitForStarted(1000) == false) {
-          // try using QdesktopServices
+          // try using QDesktopServices
           bool opened = QDesktopServices::openUrl(link);
           if (opened == false) {
             consoleUi.textBrowser->append(
@@ -275,15 +275,17 @@ void MainWindow::init_player() {
     if (state == QMediaPlayer::PlayingState ||
         state == QMediaPlayer::StoppedState)
       _loader->stop();
-    ui->play->setIcon(QIcon(state == (QMediaPlayer::PlayingState) ||
-                                    state == (QMediaPlayer::BufferedMedia)
-                                ? ":/icons/pause-line.png"
-                                : ":/icons/play-line.png"));
+    ui->play->setIcon(
+        QIcon(state == (QMediaPlayer::PlayingState) ||
+                      player->mediaStatus() == (QMediaPlayer::BufferedMedia)
+                  ? ":/icons/pause-line.png"
+                  : ":/icons/play-line.png"));
     if (isPlayingPreview)
-      ui->preview->setIcon(QIcon(state == (QMediaPlayer::PlayingState) ||
-                                         state == (QMediaPlayer::BufferedMedia)
-                                     ? ":/icons/pause-line.png"
-                                     : ":/icons/play-line.png"));
+      ui->preview->setIcon(
+          QIcon(state == (QMediaPlayer::PlayingState) ||
+                        player->mediaStatus() == (QMediaPlayer::BufferedMedia)
+                    ? ":/icons/pause-line.png"
+                    : ":/icons/play-line.png"));
   });
 
   connect(player, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
@@ -442,6 +444,16 @@ MainWindow::~MainWindow() {
     ffmpegProcess->disconnect();
     ffmpegProcess->deleteLater();
   }
+
+  delete rsH;
+  delete settingsWidget;
+  delete screenshotProcess;
+  delete screenshot;
+  delete youtubeWidget;
+  delete _error;
+  delete player;
+  delete consoleWidget;
+
   delete ui;
 }
 
@@ -483,7 +495,7 @@ void MainWindow::on_start_clicked() {
     engineProcess = nullptr;
     consoleUi.textBrowser->append(
         "<br><i style='color:red'>Process cancelled.</i><br>\n");
-    QTimer::singleShot(800, [=]() {
+    QTimer::singleShot(800, this, [=]() {
       consoleUi.textBrowser->clear();
       on_start_clicked();
     });

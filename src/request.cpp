@@ -8,7 +8,6 @@ Request::Request(QObject *parent) : QObject(parent)
 
 Request::~Request()
 {
-    this->deleteLater();
 }
 
 void Request::get(const QUrl url){

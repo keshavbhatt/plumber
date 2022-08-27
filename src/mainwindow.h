@@ -114,6 +114,7 @@ private slots:
   void on_screenshotUpperFrame_clicked();
 
   void takeScreenshot();
+
   void on_youtube_clicked();
 
 protected slots:
@@ -130,7 +131,7 @@ private:
 
   QSettings settings;
 
-  RangeSlider *rsH;
+  RangeSlider *rsH = nullptr;
 
   QMediaPlayer *player = nullptr;
 

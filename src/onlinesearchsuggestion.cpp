@@ -51,7 +51,11 @@ onlineSearchSuggestion::onlineSearchSuggestion(QLineEdit *parent)
           SLOT(handleNetworkData(QNetworkReply *)));
 }
 
-onlineSearchSuggestion::~onlineSearchSuggestion() { delete popup; }
+onlineSearchSuggestion::~onlineSearchSuggestion() {
+    if(popup != nullptr){
+        delete popup;
+    }
+}
 
 bool onlineSearchSuggestion::eventFilter(QObject *obj, QEvent *ev) {
   if (obj != popup)
