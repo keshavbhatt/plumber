@@ -29,7 +29,7 @@ Issue the following command to install Plumber:
 [![plumber](https://snapcraft.io/plumber/trending.svg)](https://snapcraft.io/plumber)[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/plumber)
 
 ## Shortcuts
-Space: Preview
+```Space: Preview
 k: Play/pause
 j: Back 10 secs
 l: Forward 10 secs
@@ -37,7 +37,7 @@ i: set the In mark
 o: set the Out mark
 a: go to the In mark
 s: go to the Out mark
-Ctrl-D: open the Youtube browser
+Ctrl-D: open the Youtube browser```
 
 ## Credits :
 "Plumber" the name of this application was suggeted by 
