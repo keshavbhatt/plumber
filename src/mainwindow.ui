@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
-    <height>462</height>
+    <width>362</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -819,9 +819,6 @@ color: #babec2
                       <width>14</width>
                       <height>14</height>
                      </size>
-                    </property>
-                    <property name="shortcut">
-                     <string>Space</string>
                     </property>
                    </widget>
                   </item>

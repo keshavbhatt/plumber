@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
   QObject::connect(shortcutj, &QShortcut::activated, this, &MainWindow::back_10_secs);
   QShortcut *shortcutl = new QShortcut(QKeySequence(Qt::Key_L), this);
   QObject::connect(shortcutl, &QShortcut::activated, this, &MainWindow::forward_10_secs);
+  QShortcut *shortcutspace = new QShortcut(QKeySequence(Qt::Key_Space), this);
+  QObject::connect(shortcutspace, &QShortcut::activated, this, &MainWindow::on_play_clicked);
 
 
   QString path =
