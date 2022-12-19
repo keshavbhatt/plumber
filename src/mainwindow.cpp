@@ -25,6 +25,12 @@ MainWindow::MainWindow(QWidget *parent)
     settings.setValue("mode", "video");
   }
 
+  QShortcut *shortcutj = new QShortcut(QKeySequence(Qt::Key_J), this);
+  QObject::connect(shortcutj, &QShortcut::activated, this, &MainWindow::back_10_secs);
+  QShortcut *shortcutl = new QShortcut(QKeySequence(Qt::Key_L), this);
+  QObject::connect(shortcutl, &QShortcut::activated, this, &MainWindow::forward_10_secs);
+
+
   QString path =
       settings
           .value("destination", QStandardPaths::writableLocation(
@@ -323,6 +329,14 @@ void MainWindow::init_player() {
                 ? _loader->start()
                 : _loader->stop();
           });
+}
+
+void MainWindow::back_10_secs() {
+      player->setPosition((player->position() - 10000) ) ;
+}
+
+void MainWindow::forward_10_secs() {
+      player->setPosition((player->position() + 10000) ) ;
 }
 
 void MainWindow::hideConsole() {
