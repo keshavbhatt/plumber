@@ -37,6 +37,7 @@ i: set the In mark
 o: set the Out mark
 a: go to the In mark
 s: go to the Out mark
+Ctrl-D: open the Youtube browser
 
 ## Credits :
 "Plumber" the name of this application was suggeted by 
