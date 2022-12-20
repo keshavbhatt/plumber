@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   this->setWindowTitle(QApplication::applicationName() + " v" +
                        QApplication::applicationVersion());
-  this->setWindowIcon(QIcon(":/icons/app/icon-256.png"));
+  this->setWindowIcon(QIcon(":/icons/app/icon-128.png"));
   setStyle(":/qbreeze/" + settings.value("theme", "dark").toString() + ".qss");
 
   ui->start->setEnabled(false);
