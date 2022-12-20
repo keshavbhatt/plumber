@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
-    <height>462</height>
+    <width>362</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,9 @@
           <width>18</width>
           <height>18</height>
          </size>
+        </property>
+        <property name="shortcut">
+         <string>Ctrl+D</string>
         </property>
        </widget>
       </item>
@@ -273,6 +276,9 @@ color: #babec2
                <height>18</height>
               </size>
              </property>
+             <property name="shortcut">
+              <string>K</string>
+             </property>
             </widget>
            </item>
            <item>
@@ -444,6 +450,9 @@ color: #babec2
                     <height>18</height>
                    </size>
                   </property>
+                  <property name="shortcut">
+                   <string>I</string>
+                  </property>
                  </widget>
                 </item>
                 <item row="2" column="1">
@@ -530,6 +539,9 @@ color: #babec2
                       <height>22</height>
                      </size>
                     </property>
+                    <property name="shortcut">
+                     <string>A</string>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -606,6 +618,9 @@ color: #babec2
                     <height>18</height>
                    </size>
                   </property>
+                  <property name="shortcut">
+                   <string>O</string>
+                  </property>
                  </widget>
                 </item>
                 <item row="3" column="2">
@@ -668,6 +683,9 @@ color: #babec2
                       <width>22</width>
                       <height>22</height>
                      </size>
+                    </property>
+                    <property name="shortcut">
+                     <string>S</string>
                     </property>
                    </widget>
                   </item>

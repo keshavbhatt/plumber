@@ -21,6 +21,7 @@
 #include "ui_console.h"
 #include "utils.h"
 #include "waitingspinnerwidget.h"
+#include <QShortcut>
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +39,10 @@ signals:
   void consoleVisibilityChanged(const bool isVisible);
 
 private slots:
+
+  void back_10_secs();
+
+  void forward_10_secs();
 
   void setConsoleHidden(bool hidden);
 
