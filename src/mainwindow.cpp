@@ -26,18 +26,21 @@ MainWindow::MainWindow(QWidget *parent)
   }
 
   QShortcut *shortcutj = new QShortcut(QKeySequence(Qt::Key_J), this);
-  QObject::connect(shortcutj, &QShortcut::activated, this, &MainWindow::back_10_secs);
+  QObject::connect(shortcutj, &QShortcut::activated, this,
+                   &MainWindow::back_10_secs);
   QShortcut *shortcutl = new QShortcut(QKeySequence(Qt::Key_L), this);
-  QObject::connect(shortcutl, &QShortcut::activated, this, &MainWindow::forward_10_secs);
+  QObject::connect(shortcutl, &QShortcut::activated, this,
+                   &MainWindow::forward_10_secs);
   QShortcut *shortcutspace = new QShortcut(QKeySequence(Qt::Key_Space), this);
-  QObject::connect(shortcutspace, &QShortcut::activated, this, &MainWindow::on_play_clicked);
-
+  QObject::connect(shortcutspace, &QShortcut::activated, this,
+                   &MainWindow::on_play_clicked);
 
   QString path =
       settings
           .value("destination", QStandardPaths::writableLocation(
                                     QStandardPaths::DownloadLocation) +
-                                    "/" + QApplication::applicationName())
+                                    QDir::separator() +
+                                    QApplication::applicationName())
           .toString();
   QFileInfo pathInfo(path);
   if (pathInfo.exists() == false) {
@@ -334,11 +337,11 @@ void MainWindow::init_player() {
 }
 
 void MainWindow::back_10_secs() {
-      player->setPosition((player->position() - 10000) ) ;
+  player->setPosition((player->position() - 10000));
 }
 
 void MainWindow::forward_10_secs() {
-      player->setPosition((player->position() + 10000) ) ;
+  player->setPosition((player->position() + 10000));
 }
 
 void MainWindow::hideConsole() {
