@@ -40,5 +40,5 @@ Issue the following command to install Plumber:
 
 ## Credits :
 "Plumber" the name of this application was suggeted by 
- [Simon Butcher](https://github.com/sbutcher) I thanks Simon :) 
+ [Simon Butcher](https://github.com/sbutcher).Thank you Simon :) 
 
