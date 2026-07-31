@@ -39,11 +39,6 @@ parts:
     cmake-parameters:
       - -DCMAKE_INSTALL_PREFIX=/usr
       - -DCMAKE_BUILD_TYPE=Release
-      # The SDK snap's libpulse.so.0 (pulled in by Qt6::Multimedia) keeps
-      # its private libpulsecommon in a pulseaudio/ subdirectory the build
-      # container's linker does not search, failing the link with undefined
-      # pa_* references. Snap-build-only quirk; runtime is unaffected.
-      - -DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath-link,/snap/kde-qt6-core24-sdk/current/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}/pulseaudio
     override-build: |
       craftctl default
       sed -i 's|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/512x512/apps/plumber.png|' ${CRAFT_PART_INSTALL}/usr/share/applications/plumber.desktop
