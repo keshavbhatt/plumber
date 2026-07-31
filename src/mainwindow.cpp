@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "utils.h"
 #include "ui_mainwindow.h"
 
 #include <QDesktopServices>
@@ -132,7 +133,7 @@ MainWindow::MainWindow(QWidget *parent)
       restoreState(settings.value("windowState").toByteArray());
     } else {
       QScreen *pScreen =
-          QGuiApplication::screenAt(this->mapToGlobal({this->width() / 2, 0}));
+          QGuiApplication::screenAt(this->mapToGlobal(QPoint(this->width() / 2, 0)));
       QRect availableScreenSize = pScreen->availableGeometry();
       this->move(availableScreenSize.center() - this->rect().center());
     }
@@ -142,6 +143,9 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::init_player() {
   // init media player
   player = new QMediaPlayer(this);
+  // Qt 6: players need an explicit audio output; volume lives there (0..1)
+  audioOutput = new QAudioOutput(player);
+  player->setAudioOutput(audioOutput);
 
   QVideoWidget *videoWidget = new QVideoWidget(this);
   videoWidget->setObjectName("videoWidget");
@@ -171,28 +175,7 @@ void MainWindow::init_player() {
           return;
         }
 
-        QProcess *xdg_open = new QProcess(this);
-        xdg_open->start("xdg-open", QStringList() << link.toString());
-        if (xdg_open->waitForStarted(1000) == false) {
-          // try using QDesktopServices
-          bool opened = QDesktopServices::openUrl(link);
-          if (opened == false) {
-            consoleUi.textBrowser->append(
-                "<br><i style='color:red'>Failed to open '" + link.toString() +
-                "'</i>");
-            qWarning() << "failed to open url" << link;
-          }
-        }
-        connect(
-            xdg_open,
-            static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
-                &QProcess::finished),
-            [this, xdg_open](int exitCode, QProcess::ExitStatus exitStatus) {
-              Q_UNUSED(exitCode);
-              Q_UNUSED(exitStatus);
-              xdg_open->close();
-              xdg_open->deleteLater();
-            });
+        utils::desktopOpenUrl(link.toString());
       });
 
   QTimer::singleShot(100, this, SLOT(resizeFix()));
@@ -209,14 +192,15 @@ void MainWindow::init_player() {
   _loader->setRevolutionsPerSecond(3);
   _loader->setColor(QColor("#1e90ff"));
 
-  connect(player, &QMediaPlayer::volumeChanged, [=](int volume) {
+  connect(audioOutput, &QAudioOutput::volumeChanged, [=](float linearVolume) {
+    int volume = qRound(linearVolume * 100.0f);
     ui->vl->setText((QString::number(volume).length() < 2 ? "0" : "") +
                     QString::number(volume));
     ui->volume->setValue(volume);
     settings.setValue("volume", volume);
   });
 
-  player->setVolume(settings.value("volume", 50).toInt());
+  audioOutput->setVolume(settings.value("volume", 50).toInt() / 100.0);
 
   connect(ui->playerSeekSlider, &seekSlider::setPosition, [=](QPoint localPos) {
     ui->playerSeekSlider->blockSignals(true);
@@ -282,7 +266,8 @@ void MainWindow::init_player() {
     }
   });
 
-  connect(player, &QMediaPlayer::stateChanged, [=](QMediaPlayer::State state) {
+  connect(player, &QMediaPlayer::playbackStateChanged,
+          [=](QMediaPlayer::PlaybackState state) {
     if (state == QMediaPlayer::PlayingState ||
         state == QMediaPlayer::StoppedState)
       _loader->stop();
@@ -299,10 +284,10 @@ void MainWindow::init_player() {
                     : ":/icons/play-line.png"));
   });
 
-  connect(player, QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
-          [=](QMediaPlayer::Error error) {
+  connect(player, &QMediaPlayer::errorOccurred,
+          [=](QMediaPlayer::Error error, const QString &errorString) {
             Q_UNUSED(error);
-            QString error_string = player->errorString();
+            QString error_string = errorString;
             if (error_string.contains("forbidden", Qt::CaseInsensitive)) {
               forbiddenRetryCount = forbiddenRetryCount + 1;
               if (forbiddenRetryCount >
@@ -588,7 +573,7 @@ void MainWindow::on_start_clicked() {
     return;
   }
   QString addin_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   QStringList args;
   args << addin_path + "/core"
        << "-f"
@@ -596,6 +581,7 @@ void MainWindow::on_start_clicked() {
        << "-g"
        << "--get-filename" << resouceUrl;
   engineProcess = new QProcess(this);
+  engineProcess->setProcessEnvironment(utils::childProcessEnvironment());
   connect(engineProcess,
           static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
               &QProcess::finished),
@@ -614,9 +600,10 @@ void MainWindow::on_start_clicked() {
                   _loader->start();
                   playMedia(output.split("\n").first().trimmed().simplified());
                 });
-                QRegExp rx("\\n\\w");
-                if (output.contains(rx)) {
-                  QString name = rx.capturedTexts().first().trimmed() +
+                static const QRegularExpression rx("\\n\\w");
+                QRegularExpressionMatch rxMatch = rx.match(output);
+                if (rxMatch.hasMatch()) {
+                  QString name = rxMatch.captured(0).trimmed() +
                                  output.split(rx).last().trimmed().simplified();
                   ui->clipname->setText(name.left(name.lastIndexOf(".")));
                 } else {
@@ -669,7 +656,7 @@ void MainWindow::on_start_clicked() {
 
 void MainWindow::playMedia(QString url) {
 
-  player->setMedia(QUrl(url));
+  player->setSource(QUrl(url));
   player->play();
   hideConsole();
 }
@@ -698,9 +685,9 @@ void MainWindow::on_play_clicked() {
     isPlayingPreview = false;
     ui->preview->setIcon(QIcon(":/icons/play-line.png"));
   }
-  if (player->state() != QMediaPlayer::PausedState) {
+  if (player->playbackState() != QMediaPlayer::PausedState) {
     player->pause();
-  } else if (player->state() == QMediaPlayer::PausedState) {
+  } else if (player->playbackState() == QMediaPlayer::PausedState) {
     player->play();
   }
 }
@@ -734,7 +721,7 @@ void MainWindow::on_plusOneSecUpper_clicked() {
 }
 
 void MainWindow::on_volume_valueChanged(int value) {
-  player->setVolume(value);
+  audioOutput->setVolume(value / 100.0);
   if (value > 0)
     tempVolume = value;
   ui->vIcon->setIcon(value == 0 ? QIcon(":/icons/volume-mute-line.png")
@@ -797,7 +784,7 @@ void MainWindow::on_preview_clicked() {
   if (clipOptionChecker())
     return;
   hideConsole();
-  if (isPlayingPreview && player->state() == QMediaPlayer::PlayingState) {
+  if (isPlayingPreview && player->playbackState() == QMediaPlayer::PlayingState) {
     isPlayingPreview = false;
     player->pause();
     ui->preview->setIcon(QIcon(":/icons/play-line.png"));
@@ -877,7 +864,7 @@ void MainWindow::on_clip_clicked() {
   if (settings.value("mode", "video").toString() == "video") {
     args << "-c"
          << "ffmpeg -async 1 -ss " + ui->startDur->text().trimmed() + " -i \"" +
-                player->media().request().url().toString() + "\" -t " +
+                player->source().toString() + "\" -t " +
                 ui->clip_duration->text().trimmed() + getCodec() + +"\"" +
                 ui->location->text().trimmed() + "/" +
                 ui->clipname->text().trimmed() + "\" -y";
@@ -885,7 +872,7 @@ void MainWindow::on_clip_clicked() {
     args << "-c"
          << "ffmpeg -ss " + ui->startDur->text().trimmed() + " -t " +
                 ui->clip_duration->text().trimmed() + " -i \"" +
-                player->media().request().url().toString() +
+                player->source().toString() +
                 "\" -vf \"fps=" + fps + ",scale=" + scale +
                 ":-1:flags="
                 "lanczos,split[s0][s1];[s0]"
@@ -896,6 +883,7 @@ void MainWindow::on_clip_clicked() {
   }
 
   ffmpegProcess = new QProcess(this);
+  ffmpegProcess->setProcessEnvironment(utils::childProcessEnvironment());
   ffmpegProcess->setProcessChannelMode(QProcess::MergedChannels);
   connect(ffmpegProcess, &QProcess::readyRead, [=]() {
     QString output = ffmpegProcess->readAll();
@@ -1072,9 +1060,10 @@ void MainWindow::takeScreenshot() {
        << "ffmpeg -ss " +
               QString(isUpper ? ui->endDur->text().trimmed()
                               : ui->startDur->text().trimmed()) +
-              " -i \"" + player->media().request().url().toString() +
+              " -i \"" + player->source().toString() +
               "\" -vframes 1 \"" + fileLocation + "\" -y";
   screenshotProcess = new QProcess(this);
+  screenshotProcess->setProcessEnvironment(utils::childProcessEnvironment());
   connect(screenshotProcess, &QProcess::readyRead, screenshotProcess, [=]() {
     QString output = screenshotProcess->readAll();
     showConsole();

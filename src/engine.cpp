@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "utils.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -42,7 +43,7 @@ bool Engine::engineReady() {
 
 bool Engine::checkEngine() {
   QString setting_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   QFileInfo checkFile(setting_path + "/core");
   bool present = false;
   if (checkFile.exists() && checkFile.size() > 0) {
@@ -58,7 +59,7 @@ bool Engine::checkEngine() {
 void Engine::download_engine_clicked() {
 
   QString addin_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   QDir dir(addin_path);
   if (!dir.exists())
     dir.mkpath(addin_path);
@@ -83,7 +84,7 @@ void Engine::download_engine_clicked() {
 
 QString Engine::enginePath() {
   QString addin_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   return addin_path + "/" + "core";
 }
 
@@ -138,8 +139,9 @@ void Engine::slot_netwManagerFinished(QNetworkReply *reply) {
 // function used to clear engine cache, to prevent 403 and 429 issue.
 void Engine::clearEngineCache() {
   QProcess *clear_engine_cache = new QProcess(this);
+  clear_engine_cache->setProcessEnvironment(utils::childProcessEnvironment());
   QString addin_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   connect(clear_engine_cache,
           static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
               &QProcess::finished),
@@ -173,7 +175,7 @@ void Engine::get_engine_version_info() {
       m_netwManager, &QNetworkAccessManager::finished, [=](QNetworkReply *rep) {
         if (rep->error() == QNetworkReply::NoError) {
           QString addin_path =
-              QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+              QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
           QDir dir(addin_path);
           if (!dir.exists())
             dir.mkpath(addin_path);
@@ -210,7 +212,7 @@ void Engine::get_engine_version_info() {
 void Engine::check_engine_updates() {
   // read version from local core_version file
   QString addin_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   QFile *core_version_file = new QFile(addin_path + "/" + "core_version");
   if (!core_version_file->open(QIODevice::ReadOnly | QIODevice::Text)) {
     core_local_date = "2019.01.01";
@@ -333,6 +335,7 @@ void Engine::EngineVersionFromEngine(bool afterUpdate) {
   if (checkEngine() == false)
     return;
   QProcess *vprocess = new QProcess(this);
+  vprocess->setProcessEnvironment(utils::childProcessEnvironment());
   connect(vprocess, &QProcess::readyRead, [=]() {
     m_engine_version = vprocess->readAll();
     if (afterUpdate) {
@@ -351,7 +354,7 @@ void Engine::EngineVersionFromEngine(bool afterUpdate) {
           });
 
   QString setting_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   qWarning() << "checking local engine version information";
   vprocess->start("python3", QStringList() << setting_path + "/core"
                                              << "--version");

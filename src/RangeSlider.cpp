@@ -46,7 +46,6 @@ void RangeSlider::paintEvent(QPaintEvent *aEvent) {
 
   QPen pen(Qt::gray, 0.8);
   painter.setPen(pen);
-  painter.setRenderHint(QPainter::Qt4CompatiblePainting);
   QBrush backgroundBrush(QColor(0xD0, 0xD0, 0xD0));
   painter.setBrush(backgroundBrush);
   painter.drawRoundedRect(backgroundRect, 1, 1);

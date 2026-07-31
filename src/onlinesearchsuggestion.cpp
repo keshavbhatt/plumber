@@ -176,7 +176,10 @@ void onlineSearchSuggestion::handleNetworkData(QNetworkReply *networkReply) {
       }
     }
     if (editor->hasFocus() || !editor->text().isEmpty()) {
-      choices = choices.toList().toSet().toList().toVector();
+      // Qt 6 dropped toSet(); dedupe via QStringList
+      QStringList dedup(choices.begin(), choices.end());
+      dedup.removeDuplicates();
+      choices = QVector<QString>(dedup.begin(), dedup.end());
       choices.prepend(editor->text()); // add first choice from user input
       showCompletion(choices);
     }

@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QMainWindow>
+#include <QAudioOutput>
 #include <QMediaPlayer>
 #include <QProcess>
 #include <QPushButton>
@@ -139,6 +140,7 @@ private:
   RangeSlider *rsH = nullptr;
 
   QMediaPlayer *player = nullptr;
+  QAudioOutput *audioOutput = nullptr;
 
   Error *_error = nullptr;
 

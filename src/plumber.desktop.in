@@ -2,11 +2,11 @@
 Version=1.0
 GenericName=Media trimming/Video to GIF
 Comment=Trim media
-Name=Plumber
+Name=@APP_NAME@
 Type=Application
-Icon=plumber
+Icon=@APP_EXECUTABLE_NAME@
 Keywords=Clip;Video;Downloader;Gif
-Exec=plumber %F
+Exec=@APP_EXECUTABLE_NAME@ %F
 Categories=AudioVideo;Utility;Qt;
 Terminal=false
-Name[en_US]=plumber
+Name[en_US]=@APP_NAME@

@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QObject>
+#include <QProcessEnvironment>
 #include <QStandardPaths>
 #include <QTextDocument>
 
@@ -15,6 +16,8 @@ public:
   utils(QObject *parent = 0);
   virtual ~utils();
 public slots:
+  static void desktopOpenUrl(const QString str);
+  static QProcessEnvironment childProcessEnvironment();
   static bool splitString(const QString &str, int m, QStringList &list);
   static QString refreshCacheSize(const QString cache_dir);
   bool delete_cache(const QString cache_dir);

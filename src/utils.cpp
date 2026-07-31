@@ -1,5 +1,10 @@
 #include "utils.h"
 #include <QDateTime>
+#include <QRandomGenerator>
+#include <QRegularExpression>
+#include <QDesktopServices>
+#include <QProcess>
+#include <QUrl>
 
 utils::utils(QObject *parent) : QObject(parent) { setParent(parent); }
 
@@ -54,7 +59,7 @@ bool utils::delete_cache(const QString cache_dir) {
 
 // returns string with first letter capitalized
 QString utils::toCamelCase(const QString &s) {
-  QStringList parts = s.split(' ', QString::SkipEmptyParts);
+  QStringList parts = s.split(' ', Qt::SkipEmptyParts);
   for (int i = 0; i < parts.size(); ++i)
     parts[i].replace(0, 1, parts[i][0].toUpper());
   return parts.join(" ");
@@ -66,12 +71,12 @@ QString utils::generateRandomId(int length) {
   const QString possibleCharacters(
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" +
       QString::number(cd.currentMSecsSinceEpoch())
-          .remove(QRegExp("[^a-zA-Z\\d\\s]")));
+          .remove(QRegularExpression("[^a-zA-Z\\d\\s]")));
   const int randomStringLength = length;
   QString randomString;
-  qsrand(cd.toTime_t());
+  QRandomGenerator *generator = QRandomGenerator::global();
   for (int i = 0; i < randomStringLength; ++i) {
-    int index = qrand() % possibleCharacters.length();
+    int index = generator->bounded(possibleCharacters.length());
     QChar nextChar = possibleCharacters.at(index);
     randomString.append(nextChar);
   }
@@ -99,7 +104,7 @@ QString utils::convertSectoDay(qint64 secs) {
 // static on demand path maker
 QString utils::returnPath(QString pathname) {
   QString _data_path =
-      QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+      QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   if (!QDir(_data_path + "/" + pathname).exists()) {
     QDir d(_data_path + "/" + pathname);
     d.mkpath(_data_path + "/" + pathname);
@@ -157,4 +162,41 @@ bool utils::splitString(const QString &str, int m, QStringList &list) {
     list.append(strPart);
   }
   return true;
+}
+
+
+// Environment for child processes (xdg-open, python3 engine, ffmpeg, ...).
+// Outside a snap, drop the library overrides a dev run exports for the app
+// itself — host tools crash when forced onto the snap runtime's libraries
+// (e.g. /bin/sh against core24's libreadline). Inside a snap, children must
+// keep the snap environment untouched.
+QProcessEnvironment utils::childProcessEnvironment() {
+  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+  if (!env.contains("SNAP")) {
+    env.remove("LD_LIBRARY_PATH");
+    env.remove("QT_PLUGIN_PATH");
+  }
+  return env;
+}
+
+void utils::desktopOpenUrl(const QString str) {
+  QProcess *xdg_open = new QProcess(0);
+  xdg_open->setProcessEnvironment(childProcessEnvironment());
+  xdg_open->start("xdg-open", QStringList() << str);
+  if (xdg_open->waitForStarted(1000) == false) {
+    // try using QdesktopServices
+    bool opened = QDesktopServices::openUrl(QUrl(str));
+    if (opened == false) {
+      qWarning() << "failed to open url" << str;
+    }
+  }
+  QObject::connect(xdg_open,
+                   static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+                       &QProcess::finished),
+                   [xdg_open](int exitCode, QProcess::ExitStatus exitStatus) {
+                     Q_UNUSED(exitCode);
+                     Q_UNUSED(exitStatus);
+                     xdg_open->close();
+                     xdg_open->deleteLater();
+                   });
 }
