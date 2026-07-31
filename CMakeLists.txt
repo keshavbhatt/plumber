@@ -36,29 +36,6 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
-# Dev builds against the kde-qt6-core24-sdk snap on a non-Ubuntu host: some
-# imported Qt targets export the SDK's generic /usr/include (Ubuntu glibc
-# headers), which shadow the host toolchain's libc headers and break
-# libstdc++. Strip that one directory from every imported target; the Qt
-# headers proper live under .../include/<arch>/qt6 and are unaffected.
-# Harmless in snapcraft builds (the dir then equals the real sysroot's).
-if(CMAKE_PREFIX_PATH MATCHES "/snap/kde-qt6-core24-sdk/")
-    get_property(_plumber_imported DIRECTORY PROPERTY IMPORTED_TARGETS)
-    foreach(_tgt IN LISTS _plumber_imported)
-        get_target_property(_incs ${_tgt} INTERFACE_INCLUDE_DIRECTORIES)
-        if(_incs)
-            set(_filtered "")
-            foreach(_dir IN LISTS _incs)
-                if(NOT _dir MATCHES "/snap/kde-qt6-core24-sdk/[^/]+/usr/include$")
-                    list(APPEND _filtered "${_dir}")
-                endif()
-            endforeach()
-            set_property(TARGET ${_tgt} PROPERTY
-                INTERFACE_INCLUDE_DIRECTORIES "${_filtered}")
-        endif()
-    endforeach()
-endif()
-
 # Suppress qDebug output in non-debug builds.
 add_compile_definitions(
     $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>,$<CONFIG:MinSizeRel>>:QT_NO_DEBUG_OUTPUT>
